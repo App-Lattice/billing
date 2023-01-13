@@ -3,5 +3,9 @@ import restServer from '@amanos1022/rest-server';
 import './consumers/init';
 import serviceDefinitions from './api/serviceDefinitions';
 
-startServer(serviceDefinitions, `${__dirname}/../descriptor_set.bin`);
+startServer(
+  serviceDefinitions,
+  `${__dirname}/../descriptor_set.bin`,
+);
+
 restServer([]).start();
