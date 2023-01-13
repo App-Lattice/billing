@@ -4,7 +4,7 @@ import { CreateSetupIntentRequest, ShowSetupIntentResponse } from '../../tsProto
 
 const createSetupIntent = async ({ stripeCustomerId: customer }: CreateSetupIntentRequest): Promise<ShowSetupIntentResponse> => {
   // TODO: Permission check https://angelomanos.atlassian.net/browse/MIC-224
-  const { client_secret: clientSecret } = await stripe.setupIntents.create({
+  const { client_secret: clientSecret, id } = await stripe.setupIntents.create({
     payment_method_types: ['card'],
     customer,
   });
@@ -12,7 +12,7 @@ const createSetupIntent = async ({ stripeCustomerId: customer }: CreateSetupInte
   const paymentMethods = await stripe.paymentMethods.list({ customer });
 
   return {
-    clientSecret,
+    setupIntent: { id, clientSecret },
     hasPaymentMethod: paymentMethods.data.length > 0
   };
 };
