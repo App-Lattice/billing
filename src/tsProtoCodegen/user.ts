@@ -76,6 +76,7 @@ export interface ShowResponse {
   email: string;
   createdAt: number;
   updatedAt: number;
+  stripeCustomerId?: string | undefined;
 }
 
 export interface IndexRequest {
@@ -87,20 +88,18 @@ export interface IndexResponse {
   users: ShowResponse[];
 }
 
-export interface UpsertRequest {
-  id?: string | undefined;
+export interface CreateRequest {
   githubToken: string;
   githubUsername: string;
+  githubId: string;
   email: string;
 }
 
-export interface UpsertResponse {
+export interface UpdateRequest {
   id: string;
-  githubUsername: string;
-  email: string;
-  githubToken: string;
-  createdAt: number;
-  updatedAt: number;
+  githubToken?: string | undefined;
+  githubUsername?: string | undefined;
+  email?: string | undefined;
 }
 
 export interface DestroyRequest {
@@ -172,7 +171,7 @@ export const ShowRequest = {
 };
 
 function createBaseShowResponse(): ShowResponse {
-  return { id: "", githubUsername: "", email: "", createdAt: 0, updatedAt: 0 };
+  return { id: "", githubUsername: "", email: "", createdAt: 0, updatedAt: 0, stripeCustomerId: undefined };
 }
 
 export const ShowResponse = {
@@ -191,6 +190,9 @@ export const ShowResponse = {
     }
     if (message.updatedAt !== 0) {
       writer.uint32(48).int64(message.updatedAt);
+    }
+    if (message.stripeCustomerId !== undefined) {
+      writer.uint32(58).string(message.stripeCustomerId);
     }
     return writer;
   },
@@ -217,6 +219,9 @@ export const ShowResponse = {
         case 6:
           message.updatedAt = longToNumber(reader.int64() as Long);
           break;
+        case 7:
+          message.stripeCustomerId = reader.string();
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -232,6 +237,7 @@ export const ShowResponse = {
       email: isSet(object.email) ? String(object.email) : "",
       createdAt: isSet(object.createdAt) ? Number(object.createdAt) : 0,
       updatedAt: isSet(object.updatedAt) ? Number(object.updatedAt) : 0,
+      stripeCustomerId: isSet(object.stripeCustomerId) ? String(object.stripeCustomerId) : undefined,
     };
   },
 
@@ -242,6 +248,7 @@ export const ShowResponse = {
     message.email !== undefined && (obj.email = message.email);
     message.createdAt !== undefined && (obj.createdAt = Math.round(message.createdAt));
     message.updatedAt !== undefined && (obj.updatedAt = Math.round(message.updatedAt));
+    message.stripeCustomerId !== undefined && (obj.stripeCustomerId = message.stripeCustomerId);
     return obj;
   },
 
@@ -256,6 +263,7 @@ export const ShowResponse = {
     message.email = object.email ?? "";
     message.createdAt = object.createdAt ?? 0;
     message.updatedAt = object.updatedAt ?? 0;
+    message.stripeCustomerId = object.stripeCustomerId ?? undefined;
     return message;
   },
 };
@@ -377,20 +385,20 @@ export const IndexResponse = {
   },
 };
 
-function createBaseUpsertRequest(): UpsertRequest {
-  return { id: undefined, githubToken: "", githubUsername: "", email: "" };
+function createBaseCreateRequest(): CreateRequest {
+  return { githubToken: "", githubUsername: "", githubId: "", email: "" };
 }
 
-export const UpsertRequest = {
-  encode(message: UpsertRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.id !== undefined) {
-      writer.uint32(10).string(message.id);
-    }
+export const CreateRequest = {
+  encode(message: CreateRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.githubToken !== "") {
-      writer.uint32(18).string(message.githubToken);
+      writer.uint32(10).string(message.githubToken);
     }
     if (message.githubUsername !== "") {
-      writer.uint32(26).string(message.githubUsername);
+      writer.uint32(18).string(message.githubUsername);
+    }
+    if (message.githubId !== "") {
+      writer.uint32(26).string(message.githubId);
     }
     if (message.email !== "") {
       writer.uint32(34).string(message.email);
@@ -398,10 +406,90 @@ export const UpsertRequest = {
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): UpsertRequest {
+  decode(input: _m0.Reader | Uint8Array, length?: number): CreateRequest {
     const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseUpsertRequest();
+    const message = createBaseCreateRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.githubToken = reader.string();
+          break;
+        case 2:
+          message.githubUsername = reader.string();
+          break;
+        case 3:
+          message.githubId = reader.string();
+          break;
+        case 4:
+          message.email = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): CreateRequest {
+    return {
+      githubToken: isSet(object.githubToken) ? String(object.githubToken) : "",
+      githubUsername: isSet(object.githubUsername) ? String(object.githubUsername) : "",
+      githubId: isSet(object.githubId) ? String(object.githubId) : "",
+      email: isSet(object.email) ? String(object.email) : "",
+    };
+  },
+
+  toJSON(message: CreateRequest): unknown {
+    const obj: any = {};
+    message.githubToken !== undefined && (obj.githubToken = message.githubToken);
+    message.githubUsername !== undefined && (obj.githubUsername = message.githubUsername);
+    message.githubId !== undefined && (obj.githubId = message.githubId);
+    message.email !== undefined && (obj.email = message.email);
+    return obj;
+  },
+
+  create(base?: DeepPartial<CreateRequest>): CreateRequest {
+    return CreateRequest.fromPartial(base ?? {});
+  },
+
+  fromPartial(object: DeepPartial<CreateRequest>): CreateRequest {
+    const message = createBaseCreateRequest();
+    message.githubToken = object.githubToken ?? "";
+    message.githubUsername = object.githubUsername ?? "";
+    message.githubId = object.githubId ?? "";
+    message.email = object.email ?? "";
+    return message;
+  },
+};
+
+function createBaseUpdateRequest(): UpdateRequest {
+  return { id: "", githubToken: undefined, githubUsername: undefined, email: undefined };
+}
+
+export const UpdateRequest = {
+  encode(message: UpdateRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
+    }
+    if (message.githubToken !== undefined) {
+      writer.uint32(18).string(message.githubToken);
+    }
+    if (message.githubUsername !== undefined) {
+      writer.uint32(26).string(message.githubUsername);
+    }
+    if (message.email !== undefined) {
+      writer.uint32(34).string(message.email);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): UpdateRequest {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseUpdateRequest();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -425,132 +513,34 @@ export const UpsertRequest = {
     return message;
   },
 
-  fromJSON(object: any): UpsertRequest {
-    return {
-      id: isSet(object.id) ? String(object.id) : undefined,
-      githubToken: isSet(object.githubToken) ? String(object.githubToken) : "",
-      githubUsername: isSet(object.githubUsername) ? String(object.githubUsername) : "",
-      email: isSet(object.email) ? String(object.email) : "",
-    };
-  },
-
-  toJSON(message: UpsertRequest): unknown {
-    const obj: any = {};
-    message.id !== undefined && (obj.id = message.id);
-    message.githubToken !== undefined && (obj.githubToken = message.githubToken);
-    message.githubUsername !== undefined && (obj.githubUsername = message.githubUsername);
-    message.email !== undefined && (obj.email = message.email);
-    return obj;
-  },
-
-  create(base?: DeepPartial<UpsertRequest>): UpsertRequest {
-    return UpsertRequest.fromPartial(base ?? {});
-  },
-
-  fromPartial(object: DeepPartial<UpsertRequest>): UpsertRequest {
-    const message = createBaseUpsertRequest();
-    message.id = object.id ?? undefined;
-    message.githubToken = object.githubToken ?? "";
-    message.githubUsername = object.githubUsername ?? "";
-    message.email = object.email ?? "";
-    return message;
-  },
-};
-
-function createBaseUpsertResponse(): UpsertResponse {
-  return { id: "", githubUsername: "", email: "", githubToken: "", createdAt: 0, updatedAt: 0 };
-}
-
-export const UpsertResponse = {
-  encode(message: UpsertResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.id !== "") {
-      writer.uint32(10).string(message.id);
-    }
-    if (message.githubUsername !== "") {
-      writer.uint32(18).string(message.githubUsername);
-    }
-    if (message.email !== "") {
-      writer.uint32(34).string(message.email);
-    }
-    if (message.githubToken !== "") {
-      writer.uint32(58).string(message.githubToken);
-    }
-    if (message.createdAt !== 0) {
-      writer.uint32(40).int64(message.createdAt);
-    }
-    if (message.updatedAt !== 0) {
-      writer.uint32(48).int64(message.updatedAt);
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): UpsertResponse {
-    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseUpsertResponse();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          message.id = reader.string();
-          break;
-        case 2:
-          message.githubUsername = reader.string();
-          break;
-        case 4:
-          message.email = reader.string();
-          break;
-        case 7:
-          message.githubToken = reader.string();
-          break;
-        case 5:
-          message.createdAt = longToNumber(reader.int64() as Long);
-          break;
-        case 6:
-          message.updatedAt = longToNumber(reader.int64() as Long);
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
-      }
-    }
-    return message;
-  },
-
-  fromJSON(object: any): UpsertResponse {
+  fromJSON(object: any): UpdateRequest {
     return {
       id: isSet(object.id) ? String(object.id) : "",
-      githubUsername: isSet(object.githubUsername) ? String(object.githubUsername) : "",
-      email: isSet(object.email) ? String(object.email) : "",
-      githubToken: isSet(object.githubToken) ? String(object.githubToken) : "",
-      createdAt: isSet(object.createdAt) ? Number(object.createdAt) : 0,
-      updatedAt: isSet(object.updatedAt) ? Number(object.updatedAt) : 0,
+      githubToken: isSet(object.githubToken) ? String(object.githubToken) : undefined,
+      githubUsername: isSet(object.githubUsername) ? String(object.githubUsername) : undefined,
+      email: isSet(object.email) ? String(object.email) : undefined,
     };
   },
 
-  toJSON(message: UpsertResponse): unknown {
+  toJSON(message: UpdateRequest): unknown {
     const obj: any = {};
     message.id !== undefined && (obj.id = message.id);
+    message.githubToken !== undefined && (obj.githubToken = message.githubToken);
     message.githubUsername !== undefined && (obj.githubUsername = message.githubUsername);
     message.email !== undefined && (obj.email = message.email);
-    message.githubToken !== undefined && (obj.githubToken = message.githubToken);
-    message.createdAt !== undefined && (obj.createdAt = Math.round(message.createdAt));
-    message.updatedAt !== undefined && (obj.updatedAt = Math.round(message.updatedAt));
     return obj;
   },
 
-  create(base?: DeepPartial<UpsertResponse>): UpsertResponse {
-    return UpsertResponse.fromPartial(base ?? {});
+  create(base?: DeepPartial<UpdateRequest>): UpdateRequest {
+    return UpdateRequest.fromPartial(base ?? {});
   },
 
-  fromPartial(object: DeepPartial<UpsertResponse>): UpsertResponse {
-    const message = createBaseUpsertResponse();
+  fromPartial(object: DeepPartial<UpdateRequest>): UpdateRequest {
+    const message = createBaseUpdateRequest();
     message.id = object.id ?? "";
-    message.githubUsername = object.githubUsername ?? "";
-    message.email = object.email ?? "";
-    message.githubToken = object.githubToken ?? "";
-    message.createdAt = object.createdAt ?? 0;
-    message.updatedAt = object.updatedAt ?? 0;
+    message.githubToken = object.githubToken ?? undefined;
+    message.githubUsername = object.githubUsername ?? undefined;
+    message.email = object.email ?? undefined;
     return message;
   },
 };
@@ -769,11 +759,11 @@ export const APIDefinition = {
       options: {},
     },
     /** rpc index (IndexRequest) returns (IndexResponse) {} */
-    upsert: {
-      name: "upsert",
-      requestType: UpsertRequest,
+    update: {
+      name: "update",
+      requestType: UpdateRequest,
       requestStream: false,
-      responseType: UpsertResponse,
+      responseType: ShowResponse,
       responseStream: false,
       options: {},
     },
@@ -791,7 +781,7 @@ export const APIDefinition = {
 export interface APIServiceImplementation<CallContextExt = {}> {
   show(request: ShowRequest, context: CallContext & CallContextExt): Promise<DeepPartial<ShowResponse>>;
   /** rpc index (IndexRequest) returns (IndexResponse) {} */
-  upsert(request: UpsertRequest, context: CallContext & CallContextExt): Promise<DeepPartial<UpsertResponse>>;
+  update(request: UpdateRequest, context: CallContext & CallContextExt): Promise<DeepPartial<ShowResponse>>;
   getUsingGithubCode(
     request: GetUsingGithubCodeRequest,
     context: CallContext & CallContextExt,
@@ -801,7 +791,7 @@ export interface APIServiceImplementation<CallContextExt = {}> {
 export interface APIClient<CallOptionsExt = {}> {
   show(request: DeepPartial<ShowRequest>, options?: CallOptions & CallOptionsExt): Promise<ShowResponse>;
   /** rpc index (IndexRequest) returns (IndexResponse) {} */
-  upsert(request: DeepPartial<UpsertRequest>, options?: CallOptions & CallOptionsExt): Promise<UpsertResponse>;
+  update(request: DeepPartial<UpdateRequest>, options?: CallOptions & CallOptionsExt): Promise<ShowResponse>;
   getUsingGithubCode(
     request: DeepPartial<GetUsingGithubCodeRequest>,
     options?: CallOptions & CallOptionsExt,

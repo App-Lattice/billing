@@ -351,14 +351,6 @@ export const APIDefinition = {
       responseStream: false,
       options: {},
     },
-    showDefaultPaymentMethod: {
-      name: "showDefaultPaymentMethod",
-      requestType: ShowDefaultPaymentMethodRequest,
-      requestStream: false,
-      responseType: ShowDefaultPaymentMethodResponse,
-      responseStream: false,
-      options: {},
-    },
   },
 } as const;
 
@@ -367,10 +359,6 @@ export interface APIServiceImplementation<CallContextExt = {}> {
     request: CreateSetupIntentRequest,
     context: CallContext & CallContextExt,
   ): Promise<DeepPartial<ShowSetupIntentResponse>>;
-  showDefaultPaymentMethod(
-    request: ShowDefaultPaymentMethodRequest,
-    context: CallContext & CallContextExt,
-  ): Promise<DeepPartial<ShowDefaultPaymentMethodResponse>>;
 }
 
 export interface APIClient<CallOptionsExt = {}> {
@@ -378,10 +366,6 @@ export interface APIClient<CallOptionsExt = {}> {
     request: DeepPartial<CreateSetupIntentRequest>,
     options?: CallOptions & CallOptionsExt,
   ): Promise<ShowSetupIntentResponse>;
-  showDefaultPaymentMethod(
-    request: DeepPartial<ShowDefaultPaymentMethodRequest>,
-    options?: CallOptions & CallOptionsExt,
-  ): Promise<ShowDefaultPaymentMethodResponse>;
 }
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
