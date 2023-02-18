@@ -2,6 +2,7 @@
 import Long from "long";
 import type { CallContext, CallOptions } from "nice-grpc-common";
 import _m0 from "protobufjs/minimal";
+import { Struct } from "./google/protobuf/struct";
 import { CreateResponse } from "./serviceGroup";
 import { ShowResponse as ShowResponse1 } from "./user";
 
@@ -142,6 +143,7 @@ export interface CreateRequest {
   nodeSize: string;
   userId: string;
   name: string;
+  metadata?: { [key: string]: any } | undefined;
 }
 
 export interface DestroyRequest {
@@ -167,10 +169,11 @@ export interface ShowResponse {
   status: Status;
   createdAt: number;
   updatedAt: number;
+  metadata: { [key: string]: any } | undefined;
 }
 
 function createBaseCreateRequest(): CreateRequest {
-  return { numberOfNodes: 0, nodeSize: "", userId: "", name: "" };
+  return { numberOfNodes: 0, nodeSize: "", userId: "", name: "", metadata: undefined };
 }
 
 export const CreateRequest = {
@@ -186,6 +189,9 @@ export const CreateRequest = {
     }
     if (message.name !== "") {
       writer.uint32(34).string(message.name);
+    }
+    if (message.metadata !== undefined) {
+      Struct.encode(Struct.wrap(message.metadata), writer.uint32(42).fork()).ldelim();
     }
     return writer;
   },
@@ -209,6 +215,9 @@ export const CreateRequest = {
         case 4:
           message.name = reader.string();
           break;
+        case 5:
+          message.metadata = Struct.unwrap(Struct.decode(reader, reader.uint32()));
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -223,6 +232,7 @@ export const CreateRequest = {
       nodeSize: isSet(object.nodeSize) ? String(object.nodeSize) : "",
       userId: isSet(object.userId) ? String(object.userId) : "",
       name: isSet(object.name) ? String(object.name) : "",
+      metadata: isObject(object.metadata) ? object.metadata : undefined,
     };
   },
 
@@ -232,6 +242,7 @@ export const CreateRequest = {
     message.nodeSize !== undefined && (obj.nodeSize = message.nodeSize);
     message.userId !== undefined && (obj.userId = message.userId);
     message.name !== undefined && (obj.name = message.name);
+    message.metadata !== undefined && (obj.metadata = message.metadata);
     return obj;
   },
 
@@ -245,6 +256,7 @@ export const CreateRequest = {
     message.nodeSize = object.nodeSize ?? "";
     message.userId = object.userId ?? "";
     message.name = object.name ?? "";
+    message.metadata = object.metadata ?? undefined;
     return message;
   },
 };
@@ -462,7 +474,15 @@ export const ShowRequest = {
 };
 
 function createBaseShowResponse(): ShowResponse {
-  return { id: "", user: undefined, serviceGroup: undefined, status: Status.creating, createdAt: 0, updatedAt: 0 };
+  return {
+    id: "",
+    user: undefined,
+    serviceGroup: undefined,
+    status: Status.creating,
+    createdAt: 0,
+    updatedAt: 0,
+    metadata: undefined,
+  };
 }
 
 export const ShowResponse = {
@@ -484,6 +504,9 @@ export const ShowResponse = {
     }
     if (message.updatedAt !== 0) {
       writer.uint32(48).int64(message.updatedAt);
+    }
+    if (message.metadata !== undefined) {
+      Struct.encode(Struct.wrap(message.metadata), writer.uint32(58).fork()).ldelim();
     }
     return writer;
   },
@@ -513,6 +536,9 @@ export const ShowResponse = {
         case 6:
           message.updatedAt = longToNumber(reader.int64() as Long);
           break;
+        case 7:
+          message.metadata = Struct.unwrap(Struct.decode(reader, reader.uint32()));
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -529,6 +555,7 @@ export const ShowResponse = {
       status: isSet(object.status) ? statusFromJSON(object.status) : Status.creating,
       createdAt: isSet(object.createdAt) ? Number(object.createdAt) : 0,
       updatedAt: isSet(object.updatedAt) ? Number(object.updatedAt) : 0,
+      metadata: isObject(object.metadata) ? object.metadata : undefined,
     };
   },
 
@@ -541,6 +568,7 @@ export const ShowResponse = {
     message.status !== undefined && (obj.status = statusToJSON(message.status));
     message.createdAt !== undefined && (obj.createdAt = Math.round(message.createdAt));
     message.updatedAt !== undefined && (obj.updatedAt = Math.round(message.updatedAt));
+    message.metadata !== undefined && (obj.metadata = message.metadata);
     return obj;
   },
 
@@ -560,6 +588,7 @@ export const ShowResponse = {
     message.status = object.status ?? Status.creating;
     message.createdAt = object.createdAt ?? 0;
     message.updatedAt = object.updatedAt ?? 0;
+    message.metadata = object.metadata ?? undefined;
     return message;
   },
 };
@@ -654,6 +683,10 @@ function longToNumber(long: Long): number {
 if (_m0.util.Long !== Long) {
   _m0.util.Long = Long as any;
   _m0.configure();
+}
+
+function isObject(value: any): boolean {
+  return typeof value === "object" && value !== null;
 }
 
 function isSet(value: any): boolean {
